@@ -14,9 +14,10 @@ namespace PocoLithp {
 	LithpCell eval(LithpCell x, Env_p env) {
 		TRACK_STATS(++depth);
 		goto entry;
-	reduce:
-		++reductions;
-		if (DEBUG) std::cerr << INDENT() << "REDUCE Env: " << env << "\n";
+	//reduce:
+		// TODO: Currently all reduction has been removed to fix memory issues
+		//++reductions;
+		//if (DEBUG) std::cerr << INDENT() << "REDUCE Env: " << env << "\n";
 	entry:
 		// TODO: Allow VariableReference too
 		if (x.tag == Atom) {
@@ -24,47 +25,33 @@ namespace PocoLithp {
 			if (DEBUG) std::cerr << INDENT() << to_string(x) << " => " << to_string(r) << "\n";
 			TRACK_EVAL_EXIT();
 			return r;
-		}
-
-		// Anything not a list can be returned as is
-		if (x.tag != List) {
+		} else if (x.tag != List) {
+			// Anything not a list can be returned as is
 			TRACK_EVAL_EXIT();
 			return x;
-		}
-
-		if (!x.value.isArray() || x.value.size() == 0) {
+		} else if (!x.value.isArray() || x.value.size() == 0) {
+			// Empty list is invalid to eval
 			TRACK_EVAL_EXIT();
 			return sym_nil;
 		}
+
+		// (op [args...])
 		const LithpCells &xl = x.list();
 		const LithpCell &xl0 = xl[0];
 		if (xl0.tag == Atom) {
 			if (xl0 == sym_quote) {    // (quote exp)
 				TRACK_EVAL_EXIT();
 				return xl[1];
-			}
-			if (xl0 == sym_if) {       // (if test conseq [alt])
+			} else if (xl0 == sym_if) {       // (if test conseq [alt])
 				TRACK_EVAL_EXIT();
 				return eval(eval(xl[1], env) == sym_false ? (xl.size() < 4 ? sym_nil : xl[3]) : xl[2], env);
-				// Reduce by updating parameters. x will become result of if statement.
-				x = eval(xl[1], env) == sym_false ? (xl.size() < 4 ? sym_nil : xl[3]) : xl[2];
-				if (x == sym_nil) {
-					// No need to reduce this
-					TRACK_EVAL_EXIT();
-					return x;
-				}
-				if (DEBUG) std::cerr << INDENT() << "`IF` IS REDUCING, Env: " << env << "\n";
-				goto reduce;
-			}
-			if (xl0 == sym_set) {      // (set! var exp)
+			} else if (xl0 == sym_set) {      // (set! var exp)
 				TRACK_EVAL_EXIT();
 				return env->find(xl[1].atomid())[xl[1].atomid()] = eval(xl[2], env);
-			}
-			if (xl0 == sym_define) {   // (define var exp)
+			} else if (xl0 == sym_define) {   // (define var exp)
 				TRACK_EVAL_EXIT();
 				return (*env)[xl[1].atomid()] = eval(xl[2], env);
-			}
-			if (xl0 == sym_lambda) {   // (lambda (var*) exp)
+			} else if (xl0 == sym_lambda) {   // (lambda (var*) exp)
 				x.tag = Lambda;
 				// Keep a reference to the environment that exists now (when the
 				// lambda is being defined) because that's the outer environment
@@ -72,21 +59,18 @@ namespace PocoLithp {
 				x.env = env;
 				TRACK_EVAL_EXIT();
 				return x;
-			}
-			if (xl0 == sym_begin) {     // (begin exp*)
+			} else if (xl0 == sym_begin) {     // (begin exp*)
 				for (size_t i = 1; i < xl.size() - 1; ++i)
 					eval(xl[i], env);
 				TRACK_EVAL_EXIT();
 				return eval(xl.back(), env);
-				// Reduce by updating parameters
-				if (DEBUG) std::cerr << INDENT() << "BEGIN IS REDUCING" << "\n";
-				x = xl.back();
-				goto reduce;
 			}
 		}
+
 		// (proc exp*)
 		LithpCell proc(eval(xl[0], env));
 		LithpCells exps;
+		// Gather parameters
 		for (auto exp = xl.begin() + 1; exp != xl.end(); ++exp)
 			exps.push_back(eval(*exp, env));
 		if (DEBUG) std::cerr << INDENT() << "!!FINISH PARAMS Env: " << env << "\n";
@@ -102,15 +86,8 @@ namespace PocoLithp {
 			LithpEnvironment *child_env = new LithpEnvironment(/*parms*/proclist[1].list(), /*args*/exps, proc.env);
 			if (DEBUG) std::cerr << INDENT() << "!!CREATE LAMBDA Parent: " << proc.env << "  Env: " << env << "\n";
 			if (DEBUG) std::cerr << INDENT() << "!!CREATE LAMBDA Child env: " << child_env << "\n";
-			//env->remember_child_env(child_env);
-			//return eval(proclist[2], child_env);
 			TRACK_EVAL_EXIT();
 			return eval(proclist[2], Env_p(child_env));
-			x = proclist[2];
-			if (DEBUG) std::cerr << INDENT() << "LAMBDA IS REDUCING AND REPLACING env " << env << " with " << child_env << "\n";
-			//env = std::move(Env_p(child_env));
-			env = Env_p(child_env);
-			goto reduce;
 		} else if (proc.tag == Proc) {
 			const LithpCell &r = proc.proc()(exps, env.get());
 			if (DEBUG) std::cerr << INDENT() << "<Proc>" << to_string(LithpVar(List, exps)) << " => " << to_string(r) << "\n";

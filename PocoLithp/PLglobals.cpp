@@ -31,7 +31,7 @@ namespace PocoLithp {
 		AtomMapByName_t::const_iterator it = atomMapByName.find(name);
 		if (it != atomMapByName.end())
 			return it->second;
-		atomId id = atomMapByName.size();
+		atomId id = (atomId)atomMapByName.size();
 		atomMapByName.emplace(name, id);
 		atomMapById.emplace(id, name);
 		return id;
@@ -202,11 +202,6 @@ namespace PocoLithp {
 		return sym_true;
 	}
 
-	// Get number of reductions
-	LithpCell proc_reds(const LithpCells &c, LithpEnvironment *env) {
-		return LithpCell(Var, reductions);
-	}
-
 	// Run tests
 	LithpCell proc_tests(const LithpCells &c, LithpEnvironment *env) {
 		return LithpCell(Var, Test::RunTests());
@@ -215,18 +210,6 @@ namespace PocoLithp {
 	// Get environment values
 	LithpCell proc_env(const LithpCells &c, LithpEnvironment *env) {
 		return LithpCell(List, env->getCompleteEnv());
-	}
-
-	// Get current eval depth
-	LithpCell proc__depth(const LithpCells &c, LithpEnvironment *env) {
-		TRACK_STATS(return LithpCell(Var, depth));
-		return LithpCell(Atom, "#stats_not_tracked");
-	}
-
-	// Get max eval depth
-	LithpCell proc__depth_max(const LithpCells &c, LithpEnvironment *env) {
-		TRACK_STATS(return LithpCell(Var, depth_max));
-		return LithpCell(Atom, "#stats_not_tracked");
 	}
 
 	// define the bare minimum set of primitives necessary to pass the unit tests
@@ -244,8 +227,6 @@ namespace PocoLithp {
 		env["="] = env["=="] = LithpCell(&proc_equal);  env["!="] = LithpCell(&proc_not_equal);
 		env["debug"] = LithpCell(&proc_debug);          env["timing"] = LithpCell(&proc_timing);
 		env["q"] = env["quit"] = LithpCell(&proc_quit);
-		env["reds"] = LithpCell(&proc_reds);            env["tests"] = LithpCell(&proc_tests);
-		env["env"] = LithpCell(&proc_env);
-		env["_depth"] = LithpCell(&proc__depth);        env["_depth_max"] = LithpCell(&proc__depth_max);
+		env["tests"] = LithpCell(&proc_tests);          env["env"] = LithpCell(&proc_env);
 	}
 }

@@ -163,7 +163,6 @@ namespace PocoLithp {
 			//plithp_fac_test();
 			//plithp_fib_test();
 			plithp_complete_test();
-			std::cout << "Reductions: " << reductions << "\n";
 			return g_fault_count;
 		}
 	}

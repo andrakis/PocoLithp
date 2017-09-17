@@ -2,7 +2,7 @@
 
 #include "stdafx.h"
 
-#define PLITHP_VERSION "0.30"
+#define PLITHP_VERSION "0.34"
 
 #define PLITHP_TRACK_STATS 1
 
@@ -324,20 +324,12 @@ namespace PocoLithp {
 			return env_.size();
 		}
 
-		typedef std::vector<LithpEnvironment*> child_env_map;
-		void remember_child_env(LithpEnvironment *e) {
-		}
-		// Forget a specific child environment
-		void forget_child_env(LithpEnvironment *e) {
-		}
-
 		LithpEnvironment *getOuter() const {
 			return outer_.get();
 		}
 	private:
 		LithpDict env_;
 		Env_p outer_;
-		child_env_map child_envs;   // Keep track of child environments
 		static int child_env_delete_depth;
 	};
 }
