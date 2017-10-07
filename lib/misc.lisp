@@ -10,11 +10,6 @@
 		    (# () stub))                   ;; else return a stub
 	))
 
-	;; Alias a function to another function, by defining the new name as the value
-	;; of the old name. This copies the pointing function, allowing you to redefine
-	;; the old name to something else, and calling the new name will use the old behaviour.
-	(define alias (macro (OldName NewName) (_eval_ctx (list define NewName (list get! OldName)))))
-
 	;; A macro that checks if Name is defined, and returns its value
 	;; or the atom none. Can be used to supply default values for parameters.
 	(define default (macro (Name Default) (begin
@@ -23,11 +18,20 @@
 			;; and also check if a default was provided to us
 			(if (defined Default) Default none)))
 	)))
-	(alias default ifDefined)
 	;; A tuple
 	(define tuple (# (A B)
 		(list (ifDefined A) (ifDefined B))
 	))
+
+	;; Export a function from the current namespace to the global namespace.
+	;; Can also be used to alias functions.
+	(define alias (macro (Function Name)
+		(_eval_ctx (list define Name (_eval (list get! Function))))))
+	(define export (macro Symbols (begin
+		(each Symbols (# (Symbol)
+			(_eval_ctx (list define Symbol (_eval (list get! Symbol))))))
+	)))
+	(alias default ifDefined)
 
 	;; A comment macro. This is not evaluated at runtime, thus doing nothing.
 	;; However, its arguments are converted to a string, effectively storing a comment
