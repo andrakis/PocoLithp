@@ -5,11 +5,7 @@
 		(if (= 0 (length List)) Acc (foldl (tail List) (Callback (head List) Acc) Callback))
 	))
 	(define each (# (List Callback)
-		(if (> (length List) 0)
-			;; Call callback as we tail recurse
-			(each (tail List) Callback (Callback (head List)))
-		)
-	))
+		(if (= 0 (length List)) nil (begin (Callback (head List)) (each (tail List) Callback)))))
 	(define map (# (List Callback) (foldl List (list) (# (N Acc) (+ Acc (list (Callback N)))))))
 	;; Filter a list using a predicate. If Predicate returns true, it is kept.
 	(define filter (# (List Predicate)
@@ -51,6 +47,6 @@
 			(+ Acc (if (= list (tag Element)) (flatten Element) (list Element)))
 		)))
 	)))
-	(print (flatten (list 1 2 3 (list 4 5 6) 7 8)))
+	;; (print (flatten (list 1 2 3 (list 4 5 6) 7 8)))
 )
 
