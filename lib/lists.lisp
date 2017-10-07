@@ -48,5 +48,9 @@
 		)))
 	)))
 	;; (print (flatten (list 1 2 3 (list 4 5 6) 7 8)))
+
+	;; Call Callback with head and tail of List as arguments.
+	;; Return value is Callback value or nil if no elements in List.
+	(define pop (# (List Callback) (if (= 0 (length List)) nil (Callback (head List) (tail List)))))
 )
 
