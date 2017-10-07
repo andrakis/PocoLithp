@@ -71,9 +71,13 @@ It supports most modern types:
 
    * **Lambdas:** `(lambda (A B C) (+ A B C))`, `(lambda (N) (begin (test) (+ N 1)))`
 
+   * **Lambdas with variable arguments:** `(lambda Args (print "Arguments passed: " Args))`
+
    * **Lithp-like Lambdas:** `(# (A B C) (+ A B C))`, `(# (N) (begin (test) (+ N 1)))`
 
    * **Macros:** `(define ifDefined (macro (Name) (_eval (list if (list defined Name) (list get! Name) none))))` - macros are simply lambdas whose arguments are not evaluated before passing, and use the environment of their callee so have access to the callees symbols. Abritrary code can be executed, such as in this snippet where an AST is created that checks if the given variable is defined, and returns its value or the atom `none`.
+
+   * **Macros with variable arguments:** `(define dbg (macro Args (begin (print "DBG:" Args) (_eval Args))))`
 
    * **Procs:** C++ code with a signature: `LithpCell func_name(const LithpCells &args)`
 
@@ -90,6 +94,8 @@ How?
 
    * Code is data! Data is code!
 
+      * You can print any function: `(str (get! fac))`, and print its AST: `(str (get! fac) true)`.
+
       * Say your code is: `(begin (define add1 (lambda (X) (+ X 1)))(print "Add1:" (add1 5)))`
 
 	  * You could store this to a variable: `(define Code (quote (begin (define add1 (lambda (X) (+ X 1)))(print "Add1:" (add1 5)))))`
@@ -103,7 +109,7 @@ How?
 Status
 ------
 
-**Version: 0.58**
+**Version: 0.60**
 
 **Language compatibility level:** Scheme-ish, with tail-call-optimization and macros.
 
@@ -164,12 +170,16 @@ Two methods are available:
       Launch the `Debug - Run Sample` configuration within Visual Studio, or
 
       Run the executable:
-      bin\PocoLithp.exe samples\fac_recursive.lithp
-      bin\PocoLithpContrib.exe samples\fac_recursive.lithp
-      bin\plithp samples\fac_recursive.lithp
+      bin\PocoLithp.exe lib\init.lisp
+      bin\PocoLithpContrib.exe lib\init.lisp
+      bin\plithp lib\init.lisp
 
 Notable Milestones
 ------------------
+
+* Started work on module system. See the [lib](https://github.com/andrakis/PocoLithp/tree/wip/lib) directory. [lib/init.lisp](https://github.com/andrakis/PocoLithp/blob/wip/lib/init.lisp) is the intended entry point which loads these modules.
+
+* Lambdas and macros can now take an arbritrary amount of arguments by providing a variable instead of a list: `(define foo (# Args (print "Arguments given: " Args)))`
 
 * Macros are implemented. They function like lambdas, except their arguments are not evaluated before passing.
 
