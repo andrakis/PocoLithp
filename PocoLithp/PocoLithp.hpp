@@ -115,9 +115,19 @@ namespace PocoLithp {
 			using flT::cend;
 			// Capacity
 			using flT::empty;
-			bool hasHead () const { return false; }
-			bool hasTail () const { return false; }
-			size_t size() const { return 0; }
+			bool hasHead() const {
+				return cbegin() != cend();
+			}
+			bool hasTail() const {
+				return hasHead() && ++(cbegin()) != cend();
+			}
+			// Warning: O(N) complexity!
+			size_t size() const {
+				size_t i = 0;
+				for (auto it = cbegin(); it != cend(); ++it)
+					++i;
+				return i;
+			}
 			// Element access
 			using flT::front;
 			// Modifiers
@@ -147,8 +157,28 @@ namespace PocoLithp {
 			typename flT::iterator before_end () {
 				return std::next(before_begin(), std::distance(begin(), end()));
 			}
-			typename flT::const_iterator cbefore_end () {
+			typename flT::const_iterator cbefore_end () const {
 				return std::next(cbefore_begin(), std::distance(cbegin(), cend()));
+			}
+
+			typename flT::iterator tail() {
+				return ++(begin());
+			}
+			typename flT::const_iterator ctail() const {
+				return ++(cbegin());
+			}
+
+			// Preferred method of getting tail as a list
+			ForwardVector<T> tail_list() {
+				if (!hasTail())
+					return ForwardVector<T>();
+				return ForwardVector<T>(tail(), end());
+			}
+			// Preferred method of getting tail as a list
+			ForwardVector<T> tail_clist() const {
+				if (!hasTail())
+					return ForwardVector<T>();
+				return ForwardVector<T>(ctail(), cend());
 			}
 
 			void push_back(T &&v) {
@@ -159,13 +189,15 @@ namespace PocoLithp {
 			}
 			T& operator[](int i) {
 				for(auto it = begin(); it != end(); ++it)
-					if(--i == 0)
+					if(i-- == 0)
 						return *it;
+				throw InvalidArgumentException("Could not find list index");
 			}
 			const T& operator[](int i) const {
 				for(auto it = cbegin(); it != cend(); ++it)
-					if(--i == 0)
+					if(i-- == 0)
 						return *it;
+				throw InvalidArgumentException("Could not find list index");
 			}
 			bool size_atleast(size_t n) const {
 				auto it = cbegin();
@@ -191,6 +223,7 @@ namespace PocoLithp {
 	typedef std::shared_ptr<LithpEnvironment> Env_p;
 
 	// From PLglobals.cpp
+	extern const std::string lithp_banner;
 	extern const LithpCell sym_false;
 	extern const LithpCell sym_true;
 	extern const LithpCell sym_nil;
@@ -229,6 +262,7 @@ namespace PocoLithp {
 	extern UnsignedInteger parseTime, evalTime;
 	extern UnsignedInteger reductions, depth, depth_max;
 	extern bool DEBUG, TIMING, QUIT;
+	LithpCell repl(Env_p env);
 	LithpCell repl(const std::string &prompt, Env_p env);
 	LithpCell eval(LithpCell x, Env_p env);
 	LithpCell evalTimed(const LithpCell &x, Env_p env);

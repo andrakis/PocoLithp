@@ -2,10 +2,10 @@
 	(define __module__ (macro () lists))
 	;; Fold left
 	(define foldl (# (List Acc Callback)
-		(if (= 0 (length List)) Acc (foldl (tail List) (Callback (head List) Acc) Callback))
+		(if (empty List) Acc (foldl (tail List) (Callback (head List) Acc) Callback))
 	))
 	(define each (# (List Callback)
-		(if (= 0 (length List)) nil (begin (Callback (head List)) (each (tail List) Callback)))))
+		(if (empty List) nil (begin (Callback (head List)) (each (tail List) Callback)))))
 	(define map (# (List Callback) (foldl List (list) (# (N Acc) (+ Acc (list (Callback N)))))))
 	;; Filter a list using a predicate. If Predicate returns true, it is kept.
 	(define filter (# (List Predicate)
@@ -14,7 +14,7 @@
 							(if (Predicate Ele) (+ Acc (list Ele)) Acc)))
 	))
 	(define member (# (Item List) (begin
-		(if (= 0 (length List))
+		(if (empty List)
 			false
 			(begin
 				(if (= (head List) Item)
@@ -51,6 +51,6 @@
 
 	;; Call Callback with head and tail of List as arguments.
 	;; Return value is Callback value or nil if no elements in List.
-	(define pop (# (List Callback) (if (= 0 (length List)) nil (Callback (head List) (tail List)))))
+	(define pop (# (List Callback) (if (empty List) nil (Callback (head List) (tail List)))))
 )
 

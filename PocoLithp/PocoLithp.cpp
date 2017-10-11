@@ -46,6 +46,7 @@ std::string linenoise_getline(const std::string &prompt) {
 }
 #endif
 
+
 int main(int argc, char *argv[])
 {
 	GETLINE_INIT();
@@ -77,7 +78,8 @@ int main(int argc, char *argv[])
 			return ERR_EXCEPTION;
 		}
 	} else {
-		evalTimed(read(std::string("(begin (print (banner)) (repl))")), global_p);
+		std::cout << lithp_banner << std::endl;
+		repl(global_p);
 	}
 	if(TIMING)
 		std::cerr << "Total eval time: " << evalTime << "ms, parse time: " << parseTime << "ms\n";

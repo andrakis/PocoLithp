@@ -68,13 +68,11 @@ namespace PocoLithp {
 				//for (size_t i = 1; i < xl.size() - 1; ++i)
 				//	eval(xl[i], env);
 				auto i = xl.cbegin(); ++i;
-				auto i_last = i;
-				for(; i != xl.cend(); ++i) {
+				for(; i != xl.cbefore_end(); ++i) {
 					eval(*i, env);
-					i_last = i;
 				}
 				// Tail recurse
-				x = *i_last;
+				x = *i;
 			} else {
 				// (proc exp*)
 				LithpCell proc = eval(xl[0], env);
@@ -228,6 +226,12 @@ namespace PocoLithp {
 			s += to_string(*it, advanced, repre);
 		}
 		return s + ')';
+	}
+
+	// the default read-eval-print-loop
+	LithpCell repl(Env_p env)
+	{
+		return repl("plithp> ", env);
 	}
 
 	// the default read-eval-print-loop

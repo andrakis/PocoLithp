@@ -7,6 +7,12 @@ typedef std::list<PocoLithp::add_environment_proc> environment_procs_t;
 environment_procs_t environment_procs;
 
 namespace PocoLithp {
+	const std::string lithp_banner =
+		"Welcome to PocoLithp " PLITHP_VERSION " " + PLITHP_ARCH + " " + STATS_DESC + "\n"
+		"Type (q) to quit, (debug) to get / set state, (timing) to get / set state" + "\n"
+		"  Additional useful functions: (tests) (str expr) (str expr true) (env) (_depth) (_max_depth)\n"
+		"                             : (repl [prompt]) (_eval expr) (expl \"string\") \n";
+
 	const LithpCell sym_false(Atom, "false");
 	const LithpCell sym_true(Atom, "true");
 	const LithpCell sym_nil(Atom, "nil");
@@ -177,29 +183,31 @@ namespace PocoLithp {
 		if(c.empty()) return sym_true;
 		return c[0].is_nullp() ? sym_true : sym_false;
 	}
+	LithpCell proc_empty(const LithpCells &c) {
+		if (c.hasHead())
+			return booleanCell(c[0].list().hasHead() == false);
+		return sym_false;
+	}
 	LithpCell proc_head(const LithpCells &c) {
-		if(c.empty()) return sym_nil;
-		const LithpCells &lc = c[0].list();
-		if(lc.empty()) return sym_nil;
-		return lc[0];
+		if (c.hasHead())
+			return c[0].list().front();
+		else
+			return sym_nil;
 	}
 
 	LithpCell proc_tail(const LithpCells &c)
 	{
 		if (c.empty())
 			return LithpCell(List, LithpCells());
-		LithpCells result = c[0].list();
-		if(result.empty())
-			return LithpCell(List, LithpCells());
-		result.pop_front();
-		return LithpCell(List, result);
+		const LithpCells &list = c[0].list();
+		return LithpCell(List, list.tail_clist());
 	}
 
 	LithpCell proc_append(const LithpCells &c)
 	{
 		if (c.empty())
 			return LithpCell(List, LithpCells());
-		else if(c.size_atleast(1))
+		else if(!c.hasTail())
 			return LithpCell(List, c[0].list());
 		LithpCells result = c[0].list();
 		const LithpCells &c1l = c[1].list();
@@ -212,7 +220,7 @@ namespace PocoLithp {
 	{
 		if (c.empty())
 			return LithpCell(List, LithpCells());
-		else if(c.size_atleast(1))
+		else if(!c.size_atleast(1))
 			return LithpCell(List, c[0].list());
 		LithpCells result;
 		const LithpCells &c1l = c[1].list();
@@ -335,10 +343,10 @@ namespace PocoLithp {
 
 	// Invoke REPL
 	LithpCell proc_repl(const LithpCells &c, Env_p env) {
-		std::string prompt = "plithp> ";
 		if (c.size_atleast(1))
-			prompt = c[0].str();
-		return repl(prompt, env);
+			return repl(c[0].str(), env);
+		else
+			return repl(env);
 	}
 
 	// Call the eval function in the current environment with the tokenized
@@ -426,7 +434,7 @@ namespace PocoLithp {
 		env["append"] = LithpCell(&proc_append);        env["head"] = LithpCell(&proc_head);
 		env["tail"] = LithpCell(&proc_tail);            env["cons"] = LithpCell(&proc_cons);
 		env["length"] = LithpCell(&proc_length);        env["list"] = LithpCell(&proc_list);
-		env["null?"] = LithpCell(&proc_nullp);
+		env["empty"] = LithpCell(&proc_empty);          env["null?"] = LithpCell(&proc_nullp);
 		env["+"] = LithpCell(&proc_add);                env["-"] = LithpCell(&proc_sub);
 		env["*"] = LithpCell(&proc_mul);                env["/"] = LithpCell(&proc_div);
 		env[">"] = LithpCell(&proc_greater);            env["<"] = LithpCell(&proc_less);
