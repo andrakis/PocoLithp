@@ -32,26 +32,26 @@ namespace PocoLithp {
 			LithpCells xl = x.list();
 			const LithpCell &xl0 = xl[0];
 			if (xl0 == sym_quote) {           // (quote exp)
-				if(xl.size() < 1) throw InvalidArgumentException("Cannot quote nothing");
+				if(xl.empty()) throw InvalidArgumentException("Cannot quote nothing");
 				return xl[1];
 			} else if (xl0 == sym_if) {       // (if test conseq [alt])
-				if(xl.size() < 3) throw InvalidArgumentException("Not enough arguments to if");
+				if(!xl.size_atleast(3)) throw InvalidArgumentException("Not enough arguments to if");
 				// Tail recurse
 				if (DEBUG) debugstr += INDENT() + to_string(x);
 				x = eval(xl[1], env) == sym_false ? (xl.size() < 4 ? sym_nil : xl[3]) : xl[2];
 				if (DEBUG) std::cerr << debugstr + " => " + to_string(x) + "\n";
 				if (DEBUG) debugstr = "";
 			} else if (xl0 == sym_get) {      // (get! var) - lookup by atom
-				if(xl.size() < 2) throw InvalidArgumentException("Not enough arguments to get!");
+				if(!xl.size_atleast(2)) throw InvalidArgumentException("Not enough arguments to get!");
 				return envLookup(xl[1].atomid(), env);
 			} else if (xl0 == sym_set) {      // (set! var exp)
-				if(xl.size() < 3) throw InvalidArgumentException("Not enough arguments to set!");
+				if(!xl.size_atleast(3)) throw InvalidArgumentException("Not enough arguments to set!");
 				return env->find(xl[1].atomid())[xl[1].atomid()] = eval(xl[2], env);
 			} else if (xl0 == sym_define) {   // (define var exp)
-				if(xl.size() < 3) throw InvalidArgumentException("Not enough arguments to define");
+				if(!xl.size_atleast(3)) throw InvalidArgumentException("Not enough arguments to define");
 				return (*env)[xl[1].atomid()] = eval(xl[2], env);
 			} else if (xl0 == sym_defined) {  // (defined var)
-				if(xl.size() < 2) return sym_false;
+				if(!xl.size_atleast(2)) return sym_false;
 				return env->defined(xl[1].atomid()) ? sym_true : sym_false;
 			} else if (xl0 == sym_lambda || xl0 == sym_lambda2) {   // (lambda (var*) exp), (# (var*) exp)
 				x.tag = Lambda;
@@ -65,10 +65,16 @@ namespace PocoLithp {
 				x.env = nullptr;  // To be filled in later
 				return x;
 			} else if (xl0 == sym_begin) {     // (begin exp*)
-				for (size_t i = 1; i < xl.size() - 1; ++i)
-					eval(xl[i], env);
+				//for (size_t i = 1; i < xl.size() - 1; ++i)
+				//	eval(xl[i], env);
+				auto i = xl.cbegin(); ++i;
+				auto i_last = i;
+				for(; i != xl.cend(); ++i) {
+					eval(*i, env);
+					i_last = i;
+				}
 				// Tail recurse
-				x = xl.back();
+				x = *i_last;
 			} else {
 				// (proc exp*)
 				LithpCell proc = eval(xl[0], env);
@@ -83,7 +89,8 @@ namespace PocoLithp {
 				LithpCells exps;
 				// Gather parameters
 				bool isMacro = proc.tag == Macro;
-				for (auto exp = xl.begin() + 1; exp != xl.end(); ++exp) {
+				auto exp = xl.cbegin(); ++exp;
+				for (; exp != xl.cend(); ++exp) {
 					// If macro, skip eval
 					exps.push_back(isMacro ? *exp : eval(*exp, env));
 				}
@@ -117,7 +124,7 @@ namespace PocoLithp {
 							break;
 					}
 					LithpEnvironment *child_env = new LithpEnvironment(/*parms*/parms, /*args*/exps, destEnv);
-					if (proclist.size() < 3)
+					if (!proclist.size_atleast(3))
 						return sym_nil;
 					// Tail recurse
 					x = proclist[2];

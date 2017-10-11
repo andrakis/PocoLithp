@@ -9,7 +9,9 @@
 
 #include <cctype>
 #include <chrono>
+#include <forward_list>
 #include <fstream>
+#include <iterator>
 #include <iomanip>
 #include <ios>
 #include <iostream>

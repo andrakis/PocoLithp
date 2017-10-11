@@ -18,9 +18,6 @@
 
 namespace PocoLithp {
 	typedef Poco::Dynamic::Var PocoVar;
-	typedef std::vector<PocoVar> PocoList;
-	typedef std::map<PocoVar, PocoVar> PocoDict;
-
 	typedef Poco::NumberParser NumberParser;
 
 	typedef unsigned AtomType;
@@ -99,7 +96,86 @@ namespace PocoLithp {
 	typedef uint32_t atomId;
 
 	typedef LithpVar LithpCell;
-	typedef std::vector<LithpCell> LithpCells;
+	//typedef std::vector<LithpCell> LithpCells;
+	// Our implementation of vector, using forward_list
+	template<typename T>
+	class ForwardVector : public std::forward_list<T> {
+			typedef std::forward_list<T> flT;
+		public:
+			// Constructor
+			using flT::forward_list; // use the constructors from forward_list
+			// Member functions
+			using flT::operator=;
+			// Iterators
+			using flT::before_begin;
+			using flT::begin;
+			using flT::end;
+			using flT::cbefore_begin;
+			using flT::cbegin;
+			using flT::cend;
+			// Capacity
+			using flT::empty;
+			bool hasHead () const { return false; }
+			bool hasTail () const { return false; }
+			size_t size() const { return 0; }
+			// Element access
+			using flT::front;
+			// Modifiers
+			using flT::assign;
+			using flT::emplace_front;
+			using flT::push_front;
+			using flT::pop_front;
+			using flT::emplace_after;
+			using flT::insert_after;
+			using flT::erase_after;
+			using flT::swap;
+			using flT::resize;
+			using flT::clear;
+			// Operations
+			using flT::splice_after;
+			using flT::remove;
+			using flT::remove_if;
+			using flT::unique;
+			using flT::merge;
+			using flT::sort;
+			using flT::reverse;
+			// Observers
+			using flT::get_allocator;
+
+			using flT::iterator;
+			using flT::const_iterator;
+			typename flT::iterator before_end () {
+				return std::next(before_begin(), std::distance(begin(), end()));
+			}
+			typename flT::const_iterator cbefore_end () {
+				return std::next(cbefore_begin(), std::distance(cbegin(), cend()));
+			}
+
+			void push_back(T &&v) {
+				insert_after(before_end(), v);
+			}
+			void push_back(const T &v) {
+				insert_after(before_end(), v);
+			}
+			T& operator[](int i) {
+				for(auto it = begin(); it != end(); ++it)
+					if(--i == 0)
+						return *it;
+			}
+			const T& operator[](int i) const {
+				for(auto it = cbegin(); it != cend(); ++it)
+					if(--i == 0)
+						return *it;
+			}
+			bool size_atleast(size_t n) const {
+				auto it = cbegin();
+				for(; it != cend(); ++it)
+					if(--n == 0)
+						return true;
+				return it != cend();
+			}
+	};
+	typedef ForwardVector<LithpCell> LithpCells;
 	typedef LithpCells::const_iterator LithpCellIt;
 	typedef std::map<atomId, LithpCell> LithpDict;
 	typedef LithpDict::const_iterator LithpDictIt;
