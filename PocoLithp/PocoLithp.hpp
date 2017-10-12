@@ -2,7 +2,7 @@
 
 #include "stdafx.h"
 
-#define PLITHP_VERSION "0.60"
+#define PLITHP_VERSION "0.70"
 
 #ifndef NO_STATS
 #define PLITHP_TRACK_STATS
@@ -179,6 +179,12 @@ namespace PocoLithp {
 				if (!hasTail())
 					return ForwardVector<T>();
 				return ForwardVector<T>(ctail(), cend());
+			}
+			// Return a copy of the list, reversed
+			ForwardVector<T> reverse() const {
+				ForwardVector<T> copy(cbegin(), cend());
+				copy.reverse();
+				return copy;
 			}
 
 			void push_back(T &&v) {

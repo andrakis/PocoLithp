@@ -2,6 +2,25 @@
 	(define __module__ (macro () misc))
 	(define compose (# (F G) (# (X) (F (G X)))))
 	(define repeat (# (F) (compose F F)))
+	;; reverse head
+	(define rhead (# (List) (head (reverse List))))
+	;; reverse tail
+	(define rtail (# (List) (tail (reverse List))))
+	;; Call Callback with given Arguments
+	(define apply (# (Callback Arguments) (_eval (+ (list Callback) Arguments))))
+	;; Passed in: Value Value .. Callback
+	(define with (macro Values (begin
+		;; (Callback Val1 Val2 Val3 ..)
+		(apply (rhead Values) (reverse (rtail Values))))))
+	;; (define with (macro (Value Callback) (_eval (list Callback Value))))
+	(define dbg (macro (Exp)
+		;; TODO: (with (debug true) (_eval Exp) (# (DbgPrev Result) ...))
+		(with (debug true) (_eval Exp) (# (DbgPrev Result) (begin
+				(debug DbgPrev)
+				(get! Result)
+			))
+		)
+	))
 	;; Lookup a function or return a stub
 	(define lookup (# (Symbol)
 		;; Use eval to get Symbol's value at runtime

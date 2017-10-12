@@ -188,8 +188,13 @@ namespace PocoLithp {
 			return booleanCell(c[0].list().hasHead() == false);
 		return sym_false;
 	}
-	LithpCell proc_head(const LithpCells &c) {
+	LithpCell proc_reverse(const LithpCells &c) {
 		if (c.hasHead())
+			return LithpCell(List, c[0].list().reverse());
+		return LithpCell(List, LithpCells());
+	}
+	LithpCell proc_head(const LithpCells &c) {
+		if (c.hasHead() && c[0].list().hasHead())
 			return c[0].list().front();
 		else
 			return sym_nil;
@@ -435,6 +440,7 @@ namespace PocoLithp {
 		env["tail"] = LithpCell(&proc_tail);            env["cons"] = LithpCell(&proc_cons);
 		env["length"] = LithpCell(&proc_length);        env["list"] = LithpCell(&proc_list);
 		env["empty"] = LithpCell(&proc_empty);          env["null?"] = LithpCell(&proc_nullp);
+		env["reverse"] = LithpCell(&proc_reverse);
 		env["+"] = LithpCell(&proc_add);                env["-"] = LithpCell(&proc_sub);
 		env["*"] = LithpCell(&proc_mul);                env["/"] = LithpCell(&proc_div);
 		env[">"] = LithpCell(&proc_greater);            env["<"] = LithpCell(&proc_less);

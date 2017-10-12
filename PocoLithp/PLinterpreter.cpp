@@ -23,9 +23,11 @@ namespace PocoLithp {
 			} else if (x.tag != List) {
 				// Anything not a list can be returned as is
 				return x;
-			} else if (!x.value.isArray() || x.value.size() == 0) {
-				// Empty list is invalid to eval
+			} else if (!x.value.isArray()) {
 				return sym_nil;
+			} else if (x.list().empty()) {
+				// Empty list is invalid to eval
+				return x;
 			}
 
 			// (op [args...])
