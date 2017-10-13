@@ -6,7 +6,7 @@ namespace PocoLithp {
 		case Var:
 			return LithpVar(value + other.value);
 		default:
-			throw InvalidArgumentException("Invalid operation");
+			throw InvalidArgumentException("Invalid operation in +");
 		}
 	}
 	const LithpVar LithpVar::operator - (const LithpVar &other) const {
@@ -14,7 +14,7 @@ namespace PocoLithp {
 		case Var:
 			return LithpVar(value - other.value);
 		default:
-			throw InvalidArgumentException("Invalid operation");
+			throw InvalidArgumentException("Invalid operation in -");
 		}
 	}
 	const LithpVar LithpVar::operator / (const LithpVar &other) const {
@@ -22,7 +22,7 @@ namespace PocoLithp {
 		case Var:
 			return LithpVar(value / other.value);
 		default:
-			throw InvalidArgumentException("Invalid operation");
+			throw InvalidArgumentException("Invalid operation in /");
 		}
 	}
 	const LithpVar LithpVar::operator * (const LithpVar &other) const {
@@ -30,7 +30,7 @@ namespace PocoLithp {
 		case Var:
 			return LithpVar(value * other.value);
 		default:
-			throw InvalidArgumentException("Invalid operation");
+			throw InvalidArgumentException("Invalid operation in *");
 		}
 	}
 	///
@@ -65,7 +65,7 @@ namespace PocoLithp {
 		case Var:
 			return IntegerCombine(value, other.value, [](auto a, auto b) { return LithpVar(a << b); });
 		default:
-			throw InvalidArgumentException("Invalid operation");
+			throw InvalidArgumentException("Invalid operation in <<");
 		}
 	}
 	const LithpVar LithpVar::operator >> (const LithpVar &other) const {
@@ -73,7 +73,7 @@ namespace PocoLithp {
 		case Var:
 			return IntegerCombine(value, other.value, [](auto a, auto b) { return LithpVar(a >> b); });
 		default:
-			throw InvalidArgumentException("Invalid operation");
+			throw InvalidArgumentException("Invalid operation in >>");
 		}
 	}
 	const LithpVar LithpVar::operator ^ (const LithpVar &other) const {
@@ -81,7 +81,7 @@ namespace PocoLithp {
 		case Var:
 			return IntegerCombine(value, other.value, [](auto a, auto b) { return LithpVar(a ^ b); });
 		default:
-			throw InvalidArgumentException("Invalid operation");
+			throw InvalidArgumentException("Invalid operation in ^");
 		}
 	}
 	const LithpVar LithpVar::operator | (const LithpVar &other) const {
@@ -89,7 +89,7 @@ namespace PocoLithp {
 		case Var:
 			return IntegerCombine(value, other.value, [](auto a, auto b) { return LithpVar(a | b); });
 		default:
-			throw InvalidArgumentException("Invalid operation");
+			throw InvalidArgumentException("Invalid operation in |");
 		}
 	}
 	const LithpVar LithpVar::operator & (const LithpVar &other) const {
@@ -97,7 +97,7 @@ namespace PocoLithp {
 		case Var:
 			return IntegerCombine(value, other.value, [](auto a, auto b) { return LithpVar(a & b); });
 		default:
-			throw InvalidArgumentException("Invalid operation");
+			throw InvalidArgumentException("Invalid operation in &");
 		}
 	}
 	const LithpVar LithpVar::operator % (const LithpVar &other) const {
@@ -105,7 +105,7 @@ namespace PocoLithp {
 		case Var:
 			return IntegerCombine(value, other.value, [](auto a, auto b) { return LithpVar(a % b); });
 		default:
-			throw InvalidArgumentException("Invalid operation");
+			throw InvalidArgumentException("Invalid operation in %");
 		}
 	}
 	LithpVar& LithpVar::operator += (const LithpVar &other) {
@@ -121,7 +121,7 @@ namespace PocoLithp {
 			return *this = LithpVar(List, newlist);
 		}
 		default:
-			throw InvalidArgumentException("Invalid operation");
+			throw InvalidArgumentException("Invalid operation in +=");
 		}
 	}
 	LithpVar& LithpVar::operator -= (const LithpVar &other) {
@@ -129,7 +129,7 @@ namespace PocoLithp {
 		case Var:
 			return *this = LithpVar(value - other.value);
 		default:
-			throw InvalidArgumentException("Invalid operation");
+			throw InvalidArgumentException("Invalid operation in -=");
 		}
 	}
 	LithpVar& LithpVar::operator /= (const LithpVar &other) {
@@ -137,7 +137,7 @@ namespace PocoLithp {
 		case Var:
 			return *this = LithpVar(value / other.value);
 		default:
-			throw InvalidArgumentException("Invalid operation");
+			throw InvalidArgumentException("Invalid operation in /=");
 		}
 	}
 	LithpVar& LithpVar::operator *= (const LithpVar &other) {
@@ -145,7 +145,7 @@ namespace PocoLithp {
 		case Var:
 			return *this = LithpVar(value * other.value);
 		default:
-			throw InvalidArgumentException("Invalid operation");
+			throw InvalidArgumentException("Invalid operation in *=");
 		}
 	}
 }

@@ -79,10 +79,15 @@ namespace PocoLithp {
 				// (proc exp*)
 				LithpCell proc = eval(xl[0], env);
 				while (proc.tag == Atom || proc.tag == VariableReference || proc.tag == List) {
-					if (proc.tag == Atom)
-						proc = envLookup(proc.atomid(), env);
-					else
-						proc = eval(proc, env);
+					switch(proc.tag) {
+						case Atom:
+							if(sym_nil == proc || sym_false == proc || sym_true == proc)
+								return proc;
+							proc = envLookup(proc.atomid(), env);
+							break;
+						default:
+							proc = eval(proc, env);
+					}
 				}
 				if (DEBUG) std::cerr << INDENT() << "  => " << to_string(proc) << "\n";
 				if (DEBUG) debugstr = "";
@@ -134,7 +139,7 @@ namespace PocoLithp {
 				} else if (proc.tag == ProcExtended) {
 					return proc.proc_extended()(exps, env);
 				} else {
-					throw RuntimeException("Unhandled type in eval_inner");
+					return proc;
 				}
 			}
 			reductions++;

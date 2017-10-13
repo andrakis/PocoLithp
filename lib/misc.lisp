@@ -7,7 +7,7 @@
 	;; reverse tail
 	(define rtail (# (List) (tail (reverse List))))
 	;; Call Callback with given Arguments
-	(define apply (# (Callback Arguments) (_eval (+ (list Callback) Arguments))))
+	(define apply (# (Callback Arguments) ((+ (list Callback) Arguments))))
 	;; Passed in: Value Value .. Callback
 	(define with (macro Values (begin
 		;; (Callback Val1 Val2 Val3 ..)
@@ -56,6 +56,13 @@
 	;; However, its arguments are converted to a string, effectively storing a comment
 	;; in code.
 	(define %% (macro Args (str Args)))
+
+	(define while (# (Condition Body) (begin
+		(if (Condition) (begin
+			Body
+			(while Condition Body)
+		))
+	)))
 
 	;; Print out all environment items using str
 	(define envstr (# (Mode Env) (begin
